@@ -1,0 +1,63 @@
+{
+  "gerado_em": "2026-09-04T02:24:10.614Z",
+  "porta": "COM6",
+  "ferramentas_descobertas": [
+    "ecoar",
+    "listar_capacidades",
+    "obter_estado",
+    "obter_estado_wifi",
+    "obter_informacoes_dispositivo",
+    "obter_memoria_livre",
+    "obter_memoria_minima",
+    "obter_motivo_reinicio",
+    "obter_rssi_wifi",
+    "obter_tempo_atividade"
+  ],
+  "total": 7,
+  "aprovados": 7,
+  "reprovados": 0,
+  "verificacoes": [
+    {
+      "verificacao": "handshake MCP e descoberta de ferramentas",
+      "esperado": "servidor responde e declara ferramentas",
+      "aprovado": true,
+      "observado": "ferramentas=10"
+    },
+    {
+      "verificacao": "escopo padrao expoe somente leitura",
+      "esperado": "nenhuma ferramenta de escrita no escopo padrao",
+      "aprovado": true,
+      "observado": "ecoar, listar_capacidades, obter_estado, obter_estado_wifi, obter_informacoes_dispositivo, obter_memoria_livre, obter_memoria_minima, obter_motivo_reinicio, obter_rssi_wifi, obter_tempo_atividade"
+    },
+    {
+      "verificacao": "obter_estado executado no ESP32 real via MCP",
+      "esperado": "sucesso com heap e tempo de atividade do dispositivo",
+      "aprovado": true,
+      "observado": "heap=283192 uptime=1129512ms latencia=66ms"
+    },
+    {
+      "verificacao": "obter_informacoes_dispositivo via MCP",
+      "esperado": "SoC ESP32 e identidade do firmware",
+      "aprovado": true,
+      "observado": "soc=ESP32 mac=44:1D:64:FA:5E:08 idf=v5.5.5"
+    },
+    {
+      "verificacao": "ecoar com argumento valido via MCP",
+      "esperado": "texto devolvido pelo dispositivo",
+      "aprovado": true,
+      "observado": "texto=validacao-mcp"
+    },
+    {
+      "verificacao": "ecoar com argumento invalido via MCP",
+      "esperado": "recusado antes de alcancar o dispositivo",
+      "aprovado": true,
+      "observado": "isError=true"
+    },
+    {
+      "verificacao": "ferramenta de escrita fora do escopo padrao",
+      "esperado": "invocacao recusada",
+      "aprovado": true,
+      "observado": "recusada"
+    }
+  ]
+}

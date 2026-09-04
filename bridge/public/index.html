@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>IFenrir</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --fundo: #10131a;
+        --cartao: #1a1f2b;
+        --borda: #2b3242;
+        --texto: #eef1f7;
+        --suave: #9aa4b8;
+        --acento: #5b8cff;
+        --ok: #3fbf7f;
+        --falha: #ff6b6b;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: 1rem;
+        overflow-wrap: anywhere;
+        background: var(--fundo);
+        color: var(--texto);
+        font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      header { margin-bottom: 1rem; }
+      h1 { font-size: 1.4rem; margin: 0 0 .2rem; letter-spacing: .02em; }
+      .sub { color: var(--suave); font-size: .85rem; }
+      section {
+        background: var(--cartao);
+        border: 1px solid var(--borda);
+        border-radius: 10px;
+        padding: .9rem;
+        margin-bottom: .9rem;
+      }
+      h2 { font-size: .95rem; margin: 0 0 .6rem; color: var(--suave); text-transform: uppercase; letter-spacing: .06em; }
+      .linha { display: flex; justify-content: space-between; gap: .5rem; padding: .25rem 0; font-size: .9rem; }
+      .linha span:last-child { color: var(--suave); text-align: right; word-break: break-all; }
+      label { display: block; font-size: .85rem; color: var(--suave); margin: .5rem 0 .25rem; }
+      input, select, button {
+        width: 100%;
+        font: inherit;
+        padding: .6rem;
+        border-radius: 8px;
+        border: 1px solid var(--borda);
+        background: #0d1017;
+        color: var(--texto);
+      }
+      button {
+        background: var(--acento);
+        color: #0b1020;
+        border: none;
+        font-weight: 600;
+        margin-top: .7rem;
+        cursor: pointer;
+      }
+      button:disabled { opacity: .5; cursor: not-allowed; }
+      pre {
+        background: #0d1017;
+        border: 1px solid var(--borda);
+        border-radius: 8px;
+        padding: .7rem;
+        overflow-x: auto;
+        font-size: .8rem;
+        margin: .7rem 0 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .marca { display: inline-block; padding: .1rem .5rem; border-radius: 999px; font-size: .75rem; font-weight: 600; }
+      .marca.ok { background: rgba(63,191,127,.15); color: var(--ok); }
+      .marca.falha { background: rgba(255,107,107,.15); color: var(--falha); }
+      .lista { display: grid; gap: .3rem; min-width: 0; }
+      .cap {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: .5rem;
+        font-size: .85rem;
+        padding: .3rem .5rem;
+        background: #0d1017;
+        border-radius: 6px;
+        min-width: 0;
+      }
+      .cap span { min-width: 0; overflow-wrap: anywhere; }
+      .cap .marca { flex: none; }
+      .cap em { font-style: normal; color: var(--suave); font-size: .75rem; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>IFenrir</h1>
+      <div class="sub">Painel de validação do dispositivo ESP32</div>
+    </header>
+
+    <section>
+      <h2>Conexão</h2>
+      <div class="linha"><span>Dispositivo</span><span id="conectado">—</span></div>
+      <div class="linha"><span>Transporte</span><span id="transporte">—</span></div>
+      <div class="linha"><span>Interface</span><span id="descricao">—</span></div>
+      <div class="linha"><span>Autenticação</span><span id="autenticacao">—</span></div>
+      <label for="token">Token de acesso (se exigido)</label>
+      <input id="token" type="password" placeholder="deixe vazio se a ponte estiver aberta" autocomplete="off" />
+      <button id="atualizar" type="button">Atualizar estado</button>
+    </section>
+
+    <section>
+      <h2>Capacidades declaradas</h2>
+      <div class="lista" id="capacidades">Carregando…</div>
+    </section>
+
+    <section>
+      <h2>Invocar capacidade</h2>
+      <label for="capacidade">Capacidade</label>
+      <select id="capacidade"></select>
+      <div id="campos"></div>
+      <button id="invocar" type="button">Executar no ESP32</button>
+      <pre id="saida">Nenhuma execução ainda.</pre>
+    </section>
+
+    <script>
+      const estado = { capacidades: [], permitidas: [], autenticacaoExigida: false };
+
+      const argumentosPorCapacidade = {
+        ecoar: [{ nome: 'texto', rotulo: 'Texto', tipo: 'text', padrao: 'ola ifenrir' }],
+        definir_rotulo: [{ nome: 'rotulo', rotulo: 'Rótulo', tipo: 'text', padrao: 'bancada-ifes' }],
+        definir_led: [{ nome: 'ligado', rotulo: 'Ligado', tipo: 'checkbox', padrao: true }],
+      };
+
+      function cabecalhos() {
+        const token = document.getElementById('token').value.trim();
+        const base = { 'content-type': 'application/json' };
+        if (token) base.authorization = `Bearer ${token}`;
+        return base;
+      }
+
+      function marca(texto, ok) {
+        return `<span class="marca ${ok ? 'ok' : 'falha'}">${texto}</span>`;
+      }
+
+      async function carregarSaude() {
+        try {
+          const resposta = await fetch('/api/saude');
+          const dados = await resposta.json();
+          const d = dados.dispositivo ?? {};
+          estado.autenticacaoExigida = dados.autenticacao === 'token';
+          document.getElementById('conectado').innerHTML = marca(
+            d.conectado ? 'conectado' : 'desconectado',
+            Boolean(d.conectado),
+          );
+          document.getElementById('transporte').textContent = d.transporte ?? '—';
+          document.getElementById('descricao').textContent = d.descricao ?? '—';
+          document.getElementById('autenticacao').textContent = dados.autenticacao ?? '—';
+        } catch (erro) {
+          document.getElementById('conectado').innerHTML = marca('ponte inacessível', false);
+        }
+      }
+
+      async function carregarCapacidades() {
+        const alvo = document.getElementById('capacidades');
+
+        if (estado.autenticacaoExigida && document.getElementById('token').value.trim() === '') {
+          alvo.textContent = 'Informe o token de acesso para listar as capacidades.';
+          return;
+        }
+
+        try {
+          const resposta = await fetch('/api/capacidades', { headers: cabecalhos() });
+          const dados = await resposta.json();
+          if (!resposta.ok) {
+            alvo.textContent = `Não foi possível listar: ${dados.erro?.mensagem ?? 'erro'}`;
+            return;
+          }
+          estado.capacidades = dados.contrato ?? [];
+          estado.permitidas = dados.permitidas ?? [];
+
+          alvo.innerHTML = estado.capacidades
+            .map((item) => {
+              const liberada = estado.permitidas.includes(item.nome);
+              return `<div class="cap"><span>${item.nome}<br /><em>${item.tipo}</em></span>${marca(
+                liberada ? 'permitida' : 'bloqueada',
+                liberada,
+              )}</div>`;
+            })
+            .join('');
+
+          const selecao = document.getElementById('capacidade');
+          selecao.innerHTML = estado.capacidades
+            .map((item) => `<option value="${item.nome}">${item.nome}</option>`)
+            .join('');
+          desenharCampos();
+        } catch (erro) {
+          alvo.textContent = 'Falha ao consultar a ponte.';
+        }
+      }
+
+      function desenharCampos() {
+        const capacidade = document.getElementById('capacidade').value;
+        const campos = argumentosPorCapacidade[capacidade] ?? [];
+        document.getElementById('campos').innerHTML = campos
+          .map((campo) => {
+            if (campo.tipo === 'checkbox') {
+              return `<label for="arg_${campo.nome}">${campo.rotulo}</label>
+                      <select id="arg_${campo.nome}"><option value="true">sim</option><option value="false">não</option></select>`;
+            }
+            return `<label for="arg_${campo.nome}">${campo.rotulo}</label>
+                    <input id="arg_${campo.nome}" type="text" value="${campo.padrao}" />`;
+          })
+          .join('');
+      }
+
+      function montarArgumentos() {
+        const capacidade = document.getElementById('capacidade').value;
+        const campos = argumentosPorCapacidade[capacidade] ?? [];
+        const argumentos = {};
+        for (const campo of campos) {
+          const elemento = document.getElementById(`arg_${campo.nome}`);
+          if (!elemento) continue;
+          argumentos[campo.nome] = campo.tipo === 'checkbox' ? elemento.value === 'true' : elemento.value;
+        }
+        return argumentos;
+      }
+
+      async function invocar() {
+        const botao = document.getElementById('invocar');
+        const saida = document.getElementById('saida');
+        botao.disabled = true;
+        saida.textContent = 'Executando…';
+
+        try {
+          const resposta = await fetch('/api/invocar', {
+            method: 'POST',
+            headers: cabecalhos(),
+            body: JSON.stringify({
+              capacidade: document.getElementById('capacidade').value,
+              argumentos: montarArgumentos(),
+            }),
+          });
+          const dados = await resposta.json();
+          saida.textContent = `HTTP ${resposta.status}\n\n${JSON.stringify(dados, null, 2)}`;
+        } catch (erro) {
+          saida.textContent = `Falha de rede: ${erro.message}`;
+        } finally {
+          botao.disabled = false;
+          carregarSaude();
+        }
+      }
+
+      document.getElementById('capacidade').addEventListener('change', desenharCampos);
+      document.getElementById('invocar').addEventListener('click', invocar);
+      document.getElementById('atualizar').addEventListener('click', () => {
+        carregarSaude();
+        carregarCapacidades();
+      });
+
+      carregarSaude().then(carregarCapacidades);
+      setInterval(carregarSaude, 5000);
+    </script>
+  </body>
+</html>

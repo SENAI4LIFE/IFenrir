@@ -1,0 +1,108 @@
+{
+  "protocolo": "ifenrir/1",
+  "descricao": "Contrato canonico de capacidades do IFenrir. Consumido pela ponte em tempo de execucao e verificado contra o firmware real por teste de contrato.",
+  "limites": {
+    "bytesRequisicao": 1024,
+    "bytesResposta": 4096,
+    "caracteresId": 64,
+    "caracteresTextoEco": 128,
+    "caracteresRotulo": 32,
+    "tempoLimiteMs": 5000
+  },
+  "codigosErro": [
+    "PROTOCOLO_INVALIDO",
+    "MENSAGEM_MALFORMADA",
+    "MENSAGEM_EXCEDE_LIMITE",
+    "CAMPO_OBRIGATORIO_AUSENTE",
+    "CAPACIDADE_DESCONHECIDA",
+    "CAPACIDADE_NAO_PERMITIDA",
+    "ARGUMENTO_INVALIDO",
+    "TEMPO_ESGOTADO",
+    "DISPOSITIVO_DESCONECTADO",
+    "NAO_AUTENTICADO",
+    "NAO_AUTORIZADO",
+    "FALHA_INTERNA"
+  ],
+  "capacidades": [
+    {
+      "nome": "listar_capacidades",
+      "tipo": "leitura",
+      "resumo": "Lista as capacidades declaradas e permitidas pelo firmware.",
+      "argumentos": {}
+    },
+    {
+      "nome": "obter_informacoes_dispositivo",
+      "tipo": "leitura",
+      "resumo": "Identidade do dispositivo, SoC, versao de firmware e versao do ESP-IDF.",
+      "argumentos": {}
+    },
+    {
+      "nome": "obter_estado",
+      "tipo": "leitura",
+      "resumo": "Estado consolidado: tempo de atividade, memoria, conectividade e rotulo.",
+      "argumentos": {}
+    },
+    {
+      "nome": "obter_tempo_atividade",
+      "tipo": "leitura",
+      "resumo": "Tempo decorrido desde o ultimo reinicio, em milissegundos.",
+      "argumentos": {}
+    },
+    {
+      "nome": "obter_memoria_livre",
+      "tipo": "leitura",
+      "resumo": "Heap livre atual em bytes.",
+      "argumentos": {}
+    },
+    {
+      "nome": "obter_memoria_minima",
+      "tipo": "leitura",
+      "resumo": "Menor heap livre observado desde o reinicio, em bytes.",
+      "argumentos": {}
+    },
+    {
+      "nome": "obter_motivo_reinicio",
+      "tipo": "leitura",
+      "resumo": "Motivo do ultimo reinicio relatado pelo ESP-IDF.",
+      "argumentos": {}
+    },
+    {
+      "nome": "obter_estado_wifi",
+      "tipo": "leitura",
+      "resumo": "Estado da conexao Wi-Fi, SSID associado e endereco IP.",
+      "argumentos": {}
+    },
+    {
+      "nome": "obter_rssi_wifi",
+      "tipo": "leitura",
+      "resumo": "RSSI do ponto de acesso associado, em dBm.",
+      "argumentos": {}
+    },
+    {
+      "nome": "ecoar",
+      "tipo": "leitura",
+      "resumo": "Devolve o texto recebido. Usado para medir latencia de ida e volta e validar argumentos.",
+      "argumentos": {
+        "texto": { "tipo": "string", "obrigatorio": true, "maximo": 128 }
+      }
+    },
+    {
+      "nome": "definir_rotulo",
+      "tipo": "escrita",
+      "resumo": "Grava em NVS um rotulo operacional do dispositivo. Alteracao de estado persistente sem acionamento fisico.",
+      "argumentos": {
+        "rotulo": { "tipo": "string", "obrigatorio": true, "maximo": 32 }
+      }
+    },
+    {
+      "nome": "definir_led",
+      "tipo": "escrita",
+      "condicional": true,
+      "condicao": "Somente presente quando CONFIG_IFENRIR_ATUADOR_LED_HABILITADO estiver ativo e um GPIO seguro tiver sido confirmado para a placa.",
+      "resumo": "Aciona um LED em GPIO explicitamente configurado. Desabilitado por padrao.",
+      "argumentos": {
+        "ligado": { "tipo": "booleano", "obrigatorio": true }
+      }
+    }
+  ]
+}

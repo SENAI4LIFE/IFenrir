@@ -1,0 +1,48 @@
+menu "IFenrir"
+
+    config IFENRIR_WIFI_SSID
+        string "SSID da rede Wi-Fi"
+        default ""
+        help
+            Deixe vazio para operar somente pelo transporte serial.
+            Nao versione este valor: o arquivo sdkconfig esta ignorado pelo Git.
+
+    config IFENRIR_WIFI_SENHA
+        string "Senha da rede Wi-Fi"
+        default ""
+        help
+            Deixe vazio para rede aberta ou quando o Wi-Fi nao for utilizado.
+
+    config IFENRIR_WIFI_TENTATIVAS
+        int "Tentativas de reconexao antes de recuar"
+        default 5
+        range 1 20
+
+    config IFENRIR_PONTE_URL
+        string "URL WebSocket da ponte IFenrir"
+        default ""
+        help
+            Exemplo: ws://192.168.0.10:8787/dispositivo
+            Deixe vazio para desativar o transporte WebSocket.
+
+    config IFENRIR_PONTE_TOKEN
+        string "Token de autenticacao do dispositivo na ponte"
+        default ""
+        help
+            Enviado no cabecalho X-IFenrir-Token durante o handshake WebSocket.
+
+    config IFENRIR_ATUADOR_LED_HABILITADO
+        bool "Habilitar a capacidade definir_led"
+        default n
+        help
+            Mantenha desabilitado ate confirmar que o GPIO abaixo aciona um LED
+            seguro na sua placa. Enquanto desabilitado a capacidade permanece
+            declarada porem nao permitida.
+
+    config IFENRIR_ATUADOR_LED_GPIO
+        int "GPIO do LED"
+        default 2
+        range 0 33
+        depends on IFENRIR_ATUADOR_LED_HABILITADO
+
+endmenu

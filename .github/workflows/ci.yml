@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  ponte:
+    name: Testes da ponte (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: bridge/package-lock.json
+
+      - name: Instalar dependencias
+        working-directory: bridge
+        run: npm ci --ignore-scripts
+
+      - name: Validar o contrato canonico
+        run: node -e "JSON.parse(require('fs').readFileSync('protocolo/ifenrir-protocolo.json','utf8'))"
+
+      - name: Testes unitarios, de protocolo e de integracao
+        working-directory: bridge
+        run: npm test
+
+  interface:
+    name: Interface e navegadores
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: bridge/package-lock.json
+
+      - name: Instalar dependencias
+        working-directory: bridge
+        run: npm ci --ignore-scripts
+
+      - name: Instalar navegadores do Playwright
+        working-directory: bridge
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: Testes de interface e responsividade
+        working-directory: bridge
+        run: npx playwright test
+
+      - name: Preservar diagnosticos de falha
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-interface
+          path: |
+            docs/relatorios/interface-html
+            docs/relatorios/interface-junit.xml
+            bridge/test-results
+          retention-days: 7
+
+  firmware:
+    name: Build do firmware ESP32
+    runs-on: ubuntu-latest
+    container:
+      image: espressif/idf:v5.5.5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compilar a aplicacao IFenrir
+        shell: bash
+        working-directory: firmware
+        run: |
+          . "$IDF_PATH/export.sh"
+          idf.py set-target esp32
+          idf.py build
+          idf.py size
+
+      - name: Compilar a aplicacao de testes Unity
+        shell: bash
+        working-directory: firmware/test_app
+        run: |
+          . "$IDF_PATH/export.sh"
+          idf.py set-target esp32
+          idf.py build

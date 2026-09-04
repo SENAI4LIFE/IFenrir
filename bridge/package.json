@@ -1,0 +1,33 @@
+{
+  "name": "ifenrir-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Ponte IFenrir entre o dispositivo ESP32 e o OpenClaw via MCP.",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "bin": {
+    "ifenrir-bridge": "./src/cli.js"
+  },
+  "scripts": {
+    "start": "node src/cli.js serve",
+    "mcp": "node src/cli.js mcp",
+    "detect": "node src/cli.js detect",
+    "test": "node --test \"test/**/*.test.js\"",
+    "test:interface": "playwright test",
+    "test:tudo": "npm test && npm run test:interface",
+    "validar-hardware": "node scripts/hardware-validation.mjs",
+    "validar-mcp": "node scripts/mcp-e2e.mjs",
+    "capturar-serial": "node scripts/capture-serial.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.22.1",
+    "serialport": "^13.0.0",
+    "ws": "^8.19.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1"
+  }
+}

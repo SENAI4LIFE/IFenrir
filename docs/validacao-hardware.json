@@ -1,0 +1,207 @@
+{
+  "gerado_em": "2026-09-04T02:24:07.507Z",
+  "porta": "COM6",
+  "ponte_usb": "WCH CH340/CH341",
+  "total": 23,
+  "aprovados": 23,
+  "reprovados": 0,
+  "verificacoes": [
+    {
+      "verificacao": "obter_informacoes_dispositivo",
+      "esperado": "sucesso com SoC e versao de firmware",
+      "aprovado": true,
+      "observado": "soc=ESP32 firmware=0.1.0 idf=v5.5.5"
+    },
+    {
+      "verificacao": "obter_estado",
+      "esperado": "sucesso com memoria e tempo de atividade",
+      "aprovado": true,
+      "observado": "heap=283192 uptime=1126034ms"
+    },
+    {
+      "verificacao": "obter_memoria_minima",
+      "esperado": "sucesso",
+      "aprovado": true,
+      "observado": "min=277844"
+    },
+    {
+      "verificacao": "obter_motivo_reinicio",
+      "esperado": "sucesso",
+      "aprovado": true,
+      "observado": "motivo=energizacao"
+    },
+    {
+      "verificacao": "obter_estado_wifi",
+      "esperado": "sucesso",
+      "aprovado": true,
+      "observado": "estado=desabilitada"
+    },
+    {
+      "verificacao": "obter_rssi_wifi sem Wi-Fi provisionado",
+      "esperado": "FALHA_INTERNA com mensagem explicita",
+      "aprovado": true,
+      "observado": "codigo=FALHA_INTERNA"
+    },
+    {
+      "verificacao": "ecoar com argumento valido",
+      "esperado": "eco identico",
+      "aprovado": true,
+      "observado": "texto=ifenrir-hardware"
+    },
+    {
+      "verificacao": "ecoar com argumento de tipo errado",
+      "esperado": "ARGUMENTO_INVALIDO",
+      "aprovado": true,
+      "observado": "codigo=ARGUMENTO_INVALIDO"
+    },
+    {
+      "verificacao": "ecoar acima do limite de caracteres",
+      "esperado": "ARGUMENTO_INVALIDO",
+      "aprovado": true,
+      "observado": "codigo=ARGUMENTO_INVALIDO"
+    },
+    {
+      "verificacao": "definir_led com atuador desabilitado",
+      "esperado": "CAPACIDADE_NAO_PERMITIDA",
+      "aprovado": true,
+      "observado": "codigo=CAPACIDADE_NAO_PERMITIDA"
+    },
+    {
+      "verificacao": "definir_rotulo grava em NVS",
+      "esperado": "sucesso e persistencia",
+      "aprovado": true,
+      "observado": "rotulo=bancada-645398"
+    },
+    {
+      "verificacao": "rotulo persistido visivel em obter_estado",
+      "esperado": "bancada-645398",
+      "aprovado": true,
+      "observado": "rotulo=bancada-645398"
+    },
+    {
+      "verificacao": "definir_rotulo com string vazia",
+      "esperado": "ARGUMENTO_INVALIDO",
+      "aprovado": true,
+      "observado": "codigo=ARGUMENTO_INVALIDO"
+    },
+    {
+      "verificacao": "JSON malformado",
+      "esperado": "MENSAGEM_MALFORMADA",
+      "aprovado": true,
+      "observado": "codigo=MENSAGEM_MALFORMADA"
+    },
+    {
+      "verificacao": "versao de protocolo divergente",
+      "esperado": "PROTOCOLO_INVALIDO",
+      "aprovado": true,
+      "observado": "codigo=PROTOCOLO_INVALIDO"
+    },
+    {
+      "verificacao": "campo id ausente",
+      "esperado": "CAMPO_OBRIGATORIO_AUSENTE",
+      "aprovado": true,
+      "observado": "codigo=CAMPO_OBRIGATORIO_AUSENTE"
+    },
+    {
+      "verificacao": "campo capacidade ausente",
+      "esperado": "CAMPO_OBRIGATORIO_AUSENTE",
+      "aprovado": true,
+      "observado": "codigo=CAMPO_OBRIGATORIO_AUSENTE"
+    },
+    {
+      "verificacao": "capacidade desconhecida",
+      "esperado": "CAPACIDADE_DESCONHECIDA",
+      "aprovado": true,
+      "observado": "codigo=CAPACIDADE_DESCONHECIDA"
+    },
+    {
+      "verificacao": "campo argumentos com tipo errado",
+      "esperado": "ARGUMENTO_INVALIDO",
+      "aprovado": true,
+      "observado": "codigo=ARGUMENTO_INVALIDO"
+    },
+    {
+      "verificacao": "mensagem acima do limite de bytes",
+      "esperado": "MENSAGEM_EXCEDE_LIMITE",
+      "aprovado": true,
+      "observado": "codigo=MENSAGEM_EXCEDE_LIMITE"
+    },
+    {
+      "verificacao": "30 invocacoes repetidas",
+      "esperado": "30 respostas corretas e correlacionadas",
+      "aprovado": true,
+      "observado": "amostras=30 media=49.82ms mediana=49.81ms"
+    },
+    {
+      "verificacao": "memoria minima estavel apos a carga",
+      "esperado": "sem queda relevante do heap minimo",
+      "aprovado": true,
+      "observado": "variacao=0 bytes"
+    },
+    {
+      "verificacao": "reabertura da sessao serial",
+      "esperado": "dispositivo responde novamente sem reflash",
+      "aprovado": true,
+      "observado": "tempo=64ms uptime=1128559ms"
+    }
+  ],
+  "medicoes": {
+    "dispositivo": {
+      "dispositivo": "ifenrir-fa5e08",
+      "mac": "44:1D:64:FA:5E:08",
+      "rotulo": "bancada-791870",
+      "soc": "ESP32",
+      "nucleos": 2,
+      "revisao": 301,
+      "firmware": "0.1.0",
+      "aplicacao": "ifenrir",
+      "esp_idf": "v5.5.5",
+      "protocolo": "ifenrir/1"
+    },
+    "memoria": {
+      "livre_bytes": 283192,
+      "minima_bytes": 277844,
+      "minima_bytes_final": 277844
+    },
+    "latencia": {
+      "amostras": 30,
+      "media_ms": 49.82,
+      "minimo_ms": 49.72,
+      "mediana_ms": 49.81,
+      "maximo_ms": 50.13,
+      "processamento_dispositivo_ms": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "reconexao_ms": 64
+  }
+}
